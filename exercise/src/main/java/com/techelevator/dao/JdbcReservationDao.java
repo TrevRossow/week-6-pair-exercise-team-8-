@@ -17,17 +17,29 @@ public class JdbcReservationDao implements ReservationDao {
 
     @Override // worked on this for a bit tonight... not complete/ not passing test
     public int createReservation(int siteId, String name, LocalDate fromDate, LocalDate toDate) {
-        Reservation newReservation = new Reservation();
-        String sql =
-                "INSERT INTO reservation (site_id, name, from_date, to_date)" +
-                        " VALUES (?, ?, ?, ?)" +
+
+
+        final String sql =
+                "INSERT INTO reservation (site_id, name, from_date, to_date, create_date)" +
+                        " VALUES (?, ?, ?, ?,?)" +
                         " RETURNING reservation_id;";
-        Integer newId = jdbcTemplate.queryForObject(sql, Integer.class, newReservation.getSiteId(), newReservation.getName(), newReservation.getFromDate(), newReservation.getToDate());
-        SqlRowSet results = jdbcTemplate.queryForRowSet(sql,  siteId, name, fromDate, toDate);
-        if (results.next()) {
-           newReservation = mapRowToReservation(results);
-        }
-        return newReservation.getReservationId();
+        LocalDate create_date = LocalDate.now();
+        int reservation_id = jdbcTemplate.queryForObject(sql, int.class, siteId, name, fromDate, toDate, create_date);
+        return reservation_id;
+
+//        Reservation newReservation = new Reservation();
+//        LocalDate create_date=LocalDate.now();
+//        final String sql =
+//                "INSERT INTO reservation (site_id, name, from_date, to_date, create_date)" +
+//                        " VALUES (?, ?, ?, ?, ?)" +
+//                        " RETURNING reservation_id;";
+//        int newId = jdbcTemplate.queryForObject(sql, int.class,
+//                newReservation.getSiteId(), newReservation.getName(), newReservation.getFromDate(), newReservation.getToDate(), newReservation.getCreateDate());
+//        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, siteId, name, fromDate, toDate);
+//        if (results.next()) {
+//            newReservation = mapRowToReservation(results);
+//        }
+//        return newReservation.getReservationId();
     }
 
     private Reservation mapRowToReservation(SqlRowSet results) {
