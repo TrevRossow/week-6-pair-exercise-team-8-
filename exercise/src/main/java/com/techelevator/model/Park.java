@@ -68,6 +68,10 @@ public class Park {
         this.description = description;
     }
 
+    public void getUpcomingReservations(int parkId) {
+        this.parkId = parkId;
+    }
+
     @Override
     public String toString() {
         return "Park{" +

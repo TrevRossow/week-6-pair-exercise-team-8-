@@ -1,6 +1,7 @@
 package com.techelevator.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class Reservation {
 
@@ -10,6 +11,7 @@ public class Reservation {
     private LocalDate fromDate;
     private LocalDate toDate;
     private LocalDate createDate;
+    private List<Reservation> reservation;
 
     public int getReservationId() {
         return reservationId;
@@ -58,6 +60,7 @@ public class Reservation {
     public void setCreateDate(LocalDate createDate) {
         this.createDate = createDate;
     }
+
 
     @Override
     public String toString() {

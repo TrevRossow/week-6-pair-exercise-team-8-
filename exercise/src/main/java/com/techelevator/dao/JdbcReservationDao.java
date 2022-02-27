@@ -6,6 +6,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JdbcReservationDao implements ReservationDao {
 
@@ -15,9 +17,8 @@ public class JdbcReservationDao implements ReservationDao {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    @Override // worked on this for a bit tonight... not complete/ not passing test
+    @Override
     public int createReservation(int siteId, String name, LocalDate fromDate, LocalDate toDate) {
-
 
         final String sql =
                 "INSERT INTO reservation (site_id, name, from_date, to_date, create_date)" +
@@ -27,19 +28,23 @@ public class JdbcReservationDao implements ReservationDao {
         int reservation_id = jdbcTemplate.queryForObject(sql, int.class, siteId, name, fromDate, toDate, create_date);
         return reservation_id;
 
-//        Reservation newReservation = new Reservation();
-//        LocalDate create_date=LocalDate.now();
-//        final String sql =
-//                "INSERT INTO reservation (site_id, name, from_date, to_date, create_date)" +
-//                        " VALUES (?, ?, ?, ?, ?)" +
-//                        " RETURNING reservation_id;";
-//        int newId = jdbcTemplate.queryForObject(sql, int.class,
-//                newReservation.getSiteId(), newReservation.getName(), newReservation.getFromDate(), newReservation.getToDate(), newReservation.getCreateDate());
-//        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, siteId, name, fromDate, toDate);
-//        if (results.next()) {
-//            newReservation = mapRowToReservation(results);
-//        }
-//        return newReservation.getReservationId();
+    }
+
+    @Override
+    public List<Reservation> getUpcomingReservations(int parkId) {
+        List<Reservation> reservations = new ArrayList<>();
+        String sql = "SELECT reservation_id, reservation.site_id, reservation.name, from_date, to_date, create_date, park.park_id" +
+                " FROM reservation" +
+                " JOIN site ON site.site_id = reservation.site_id" +
+                " JOIN campground ON campground.campground_id = site.campground_id" +
+                " JOIN park ON park.park_id = campground.park_id" +
+                " WHERE from_date BETWEEN CURRENT_DATE AND CURRENT_DATE + 30" +
+                " AND park.park_id = ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, parkId);
+        while (results.next()) {
+            reservations.add(mapRowToReservation(results));
+        }
+        return reservations;
     }
 
     private Reservation mapRowToReservation(SqlRowSet results) {
